@@ -1,104 +1,70 @@
-// Copyright 2018, Google, Inc.
-// Licensed under the Apache License, Version 2.0 (the 'License');
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an 'AS IS' BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-'use strict';
-
-// Import the Dialogflow module and response creation dependencies
-// from the Actions on Google client library.
-const {
-  dialogflow,
-  BasicCard,
-  Permission,
-  Suggestions,
-} = require('actions-on-google');
-
-// Import the firebase-functions package for deployment.
-const functions = require('firebase-functions');
-
-// Instantiate the Dialogflow client.
-const app = dialogflow({debug: true});
-
-// Define a mapping of fake color strings to basic card objects.
-// See https://github.com/dialogflow/dialogflow-fulfillment-nodejs
-// for Dialogflow fulfillment library docs, samples, and to report issues
-'use strict';
- 
 const functions = require('firebase-functions');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const {Card, Suggestion} = require('dialogflow-fulfillment');
- 
-process.env.DEBUG = 'dialogflow:debug'; // enables lib debugging statements
- 
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://udemy-demo-assistant-7912e.firebaseio.com"
+});
+
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   const agent = new WebhookClient({ request, response });
   console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
-  console.log('Dialogflow Intent ' + agent.intent);
-  console.log('Dialogflow Parameters ' + agent.parameters );
-  console.log('Dialogflow Parameters ' + agent.parameters['number'] );
- 
+  console.log('Dialogflow Intent: ' + agent.intent);
+  console.log('Dialogflow Parameters: ' + agent.parameters);
+
   function welcome(agent) {
     agent.add(`Welcome to my agent!`);
   }
-  function addition(agent) {
-    agent.add(`Welcome to my agent!`+agent.parameters['number']);
-  }
-  function subtraction(agent) {
-    agent.add(`Welcome to my agent!`);
-  }
- 
+
   function fallback(agent) {
     agent.add(`I didn't understand`);
     agent.add(`I'm sorry, can you try again?`);
+}
+
+  function addition(agent) {
+    const z=agent.parameters['x']+agent.parameters['y']
+    agent.add('answer is '+z);
+    // save the vote to a database
   }
 
   // // Uncomment and edit to make your own intent handler
-  // // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
-  // // below to get this function to be run when a Dialogflow intent is matched
-  // function yourFunctionHandler(agent) {
-  //   agent.add(`This message is from Dialogflow's Cloud Functions for Firebase editor!`);
-  //   agent.add(new Card({
-  //       title: `Title: this is a card title`,
-  //       imageUrl: 'https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png',
-  //       text: `This is the body text of a card.  You can even use line\n  breaks and emoji! 💁`,
-  //       buttonText: 'This is a button',
-  //       buttonUrl: 'https://assistant.google.com/'
-  //     })
-  //   );
-  //   agent.add(new Suggestion(`Quick Reply`));
-  //   agent.add(new Suggestion(`Suggestion`));
-  //   agent.setContext({ name: 'weather', lifespan: 2, parameters: { city: 'Rome' }});
-  // }
+   // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
+//   // below to get this function to be run when a Dialogflow intent is matched
+//   function yourFunctionHandler(agent) {
+//      agent.add(`This message is from Dialogflow's Cloud Functions for Firebase editor!`);
+//      agent.add(new Card({
+//          title: `Title: this is a card title`,
+//          imageUrl: 'https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png',
+//          text: `This is the body text of a card.  You can even use line\n  breaks and emoji! 💁`,
+//          buttonText: 'This is a button',
+//          buttonUrl: 'https://assistant.google.com/'
+//       })
+//      );
+//      agent.add(new Suggestion(`Quick Reply`));
+//      agent.add(new Suggestion(`Suggestion`));
+//      agent.setContext({ name: 'weather', lifespan: 2, parameters: { city: 'Rome' }});
+//   }
 
-  // // Uncomment and edit to make your own Google Assistant intent handler
-  // // uncomment `intentMap.set('your intent name here', googleAssistantHandler);`
-  // // below to get this function to be run when a Dialogflow intent is matched
-  // function googleAssistantHandler(agent) {
-  //   let conv = agent.conv(); // Get Actions on Google library conv instance
-  //   conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
-  //   agent.add(conv); // Add Actions on Google library responses to your agent's response
-  // }
-  // // See https://github.com/dialogflow/fulfillment-actions-library-nodejs
-  // // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
+//   // Uncomment and edit to make your own Google Assistant intent handler
+//   // uncomment `intentMap.set('your intent name here', googleAssistantHandler);`
+//   // below to get this function to be run when a Dialogflow intent is matched
+//   function googleAssistantHandler(agent) {
+//      let conv = agent.conv(); // Get Actions on Google library conv instance
+//      conv.ask('Hello from the Actions on Google client library!') // Use Actions on Google library
+//      agent.add(conv); // Add Actions on Google library responses to your agent's response
+//   }
+   // See https://github.com/dialogflow/dialogflow-fulfillment-nodejs/tree/master/samples/actions-on-google
+   // for a complete Dialogflow fulfillment library Actions on Google client library v2 integration sample
 
-  // Run the proper function handler based on the matched Dialogflow intent name
+//   Run the proper function handler based on the matched Dialogflow intent name
   let intentMap = new Map();
   intentMap.set('Default Welcome Intent', welcome);
   intentMap.set('Default Fallback Intent', fallback);
-  intentMap.set('addition', addition);
-  intentMap.set('subtraction', subtraction);
+  intentMap.set('Default addition Intent', addition);
+
+//   intentMap.set('your intent name here', yourFunctionHandler);
+//   intentMap.set('your intent name here', googleAssistantHandler);
   agent.handleRequest(intentMap);
 });
-
-// Set the DialogflowApp object to handle the HTTPS POST request.
-exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app);
